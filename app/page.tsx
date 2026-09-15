@@ -178,7 +178,8 @@ function TeamLogo({ teamName, size = 56 }: { teamName: string; size?: number }) 
 
 function NameTicker({ agents }: { agents: AgentContribution[] }) {
   if (agents.length === 0) return null;
-  const items = agents.map((a, index) => `${index + 1}. ${a.name.toUpperCase()} (${a.teamName.toUpperCase()}) · ${units(a.deals)} UNITS`);
+  const topAgents = agents.slice(0, 3);
+  const items = topAgents.map((a, index) => `${index + 1}. ${a.name.toUpperCase()} (${a.teamName.toUpperCase()}) · ${units(a.deals)} UNITS`);
   const loopItems = [...items, ...items];
 
   return (
@@ -210,7 +211,7 @@ function NameTicker({ agents }: { agents: AgentContribution[] }) {
             style={{
               fontSize: 17,
               padding: "0 32px",
-              color: i % agents.length === 0 ? "var(--gold)" : "var(--chalk)",
+              color: i % topAgents.length === 0 ? "var(--gold)" : "var(--chalk)",
               textShadow: "0 2px 4px rgba(0,0,0,0.45)",
             }}
           >
