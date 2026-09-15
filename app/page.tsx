@@ -168,6 +168,40 @@ function RunningMascot() {
 
 type AgentContribution = { name: string; teamName: string; deals: number; enrolled: number };
 
+const TEAM_LOGOS: Record<string, string> = {
+  bigdawgz: "/team-logos/big-dawgz.png",
+  ixfigure4orce: "/team-logos/six-figure-4orce.png",
+  moneystackers: "/team-logos/money-stackers.png",
+  dealmachine: "/team-logos/deal-machine.png",
+  debtmafia: "/team-logos/debt-mafia.png",
+  c4: "/team-logos/c4.png",
+  thedebtcartel: "/team-logos/debt-cartel.png",
+  smurfcrew: "/team-logos/smurf-crew.png",
+};
+
+function teamLogoFor(teamName: string) {
+  return TEAM_LOGOS[teamName.toLowerCase().replace(/[^a-z0-9]/g, "")];
+}
+
+function TeamLogo({ teamName, size = 44 }: { teamName: string; size?: number }) {
+  const logo = teamLogoFor(teamName);
+  if (!logo) return null;
+
+  return (
+    <img
+      src={logo}
+      alt=""
+      style={{
+        width: size,
+        height: size,
+        objectFit: "contain",
+        flex: "0 0 auto",
+        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.5))",
+      }}
+    />
+  );
+}
+
 function ContributionTicker({ agents }: { agents: AgentContribution[] }) {
   if (agents.length === 0) return null;
   const top = agents[0];
@@ -238,7 +272,18 @@ function TeamRow({ team, align = "left" }: { team: Team; align?: "left" | "right
       }}
     >
       <div style={{ textAlign: align }}>
-        <div style={{ fontWeight: 800, fontSize: 15, color: "var(--chalk)" }}>{team.teamName.toUpperCase()}</div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: align === "left" ? "row" : "row-reverse",
+            alignItems: "center",
+            justifyContent: align === "left" ? "flex-start" : "flex-end",
+            gap: 8,
+          }}
+        >
+          <div style={{ fontWeight: 800, fontSize: 15, color: "var(--chalk)" }}>{team.teamName.toUpperCase()}</div>
+          <TeamLogo teamName={team.teamName} />
+        </div>
         <div style={{ fontSize: 11, color: "var(--chalk-dim)", letterSpacing: 0.3 }}>
           CAPTAIN: {team.captain}
         </div>
@@ -327,7 +372,18 @@ function ByeCard({ team }: { team: Team }) {
       <div className="scoreboard" style={{ fontSize: 13, color: "var(--gold)", letterSpacing: 2, marginTop: 6 }}>
         ROUND 1 BYE
       </div>
-      <div style={{ fontWeight: 800, fontSize: 20, marginTop: 4 }}>{team.teamName.toUpperCase()}</div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          marginTop: 4,
+        }}
+      >
+        <div style={{ fontWeight: 800, fontSize: 20 }}>{team.teamName.toUpperCase()}</div>
+        <TeamLogo teamName={team.teamName} size={62} />
+      </div>
       <div style={{ fontSize: 13, color: "var(--chalk-dim)" }}>CAPTAIN: {team.captain}</div>
       <CountUp
         value={team.deltaDeals}
