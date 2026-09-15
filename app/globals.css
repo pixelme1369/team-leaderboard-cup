@@ -91,16 +91,6 @@ body {
   50% { box-shadow: 0 0 46px rgba(255,210,63,0.5), 0 0 14px rgba(255,210,63,0.3); }
 }
 
-@keyframes runAcross {
-  0% { left: -80px; }
-  100% { left: 100%; }
-}
-
-@keyframes runBounce {
-  0%, 100% { transform: translateY(0) rotate(-4deg); }
-  50% { transform: translateY(-10px) rotate(4deg); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
