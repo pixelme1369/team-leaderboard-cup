@@ -184,7 +184,7 @@ function teamLogoFor(teamName: string) {
   return TEAM_LOGOS[teamName.toLowerCase().replace(/[^a-z0-9]/g, "")];
 }
 
-function TeamLogo({ teamName, size = 44 }: { teamName: string; size?: number }) {
+function TeamLogo({ teamName, size = 56 }: { teamName: string; size?: number }) {
   const logo = teamLogoFor(teamName);
   if (!logo) return null;
 
@@ -268,24 +268,27 @@ function TeamRow({ team, align = "left" }: { team: Team; align?: "left" | "right
         flexDirection: align === "left" ? "row" : "row-reverse",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 10,
-        padding: "9px 14px",
+        gap: 14,
+        minHeight: 88,
+        padding: "13px 20px",
       }}
     >
-      <div style={{ textAlign: align }}>
+      <div style={{ textAlign: align, minWidth: 0 }}>
         <div
           style={{
             display: "flex",
             flexDirection: align === "left" ? "row" : "row-reverse",
             alignItems: "center",
             justifyContent: align === "left" ? "flex-start" : "flex-end",
-            gap: 8,
+            gap: 12,
           }}
         >
-          <div style={{ fontWeight: 800, fontSize: 15, color: "var(--chalk)" }}>{team.teamName.toUpperCase()}</div>
+          <div style={{ fontWeight: 800, fontSize: 20, color: "var(--chalk)", lineHeight: 1.05 }}>
+            {team.teamName.toUpperCase()}
+          </div>
           <TeamLogo teamName={team.teamName} />
         </div>
-        <div style={{ fontSize: 11, color: "var(--chalk-dim)", letterSpacing: 0.3 }}>
+        <div style={{ fontSize: 14, color: "var(--chalk-dim)", letterSpacing: 0.3, marginTop: 5 }}>
           CAPTAIN: {team.captain}
         </div>
       </div>
@@ -293,7 +296,7 @@ function TeamRow({ team, align = "left" }: { team: Team; align?: "left" | "right
         value={team.deltaDeals}
         format={units}
         className="scoreboard"
-        style={{ fontSize: 22, color: "var(--gold)", minWidth: 34, textAlign: align === "left" ? "right" : "left" }}
+        style={{ fontSize: 30, color: "var(--gold)", minWidth: 46, textAlign: align === "left" ? "right" : "left" }}
       />
     </div>
   );
@@ -307,7 +310,7 @@ function MatchCard({ a, b, align = "left", delay = 0 }: { a: Team; b: Team; alig
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4 }}
       style={{
-        width: 300,
+        width: 410,
         background: "linear-gradient(180deg, var(--navy-surface), var(--navy-deep))",
         border: "1.5px solid var(--gold-line)",
         borderRadius: 8,
@@ -333,12 +336,12 @@ function MatchCard({ a, b, align = "left", delay = 0 }: { a: Team; b: Team; alig
       <div
         style={{
           textAlign: "center",
-          fontSize: 10,
+          fontSize: 12,
           letterSpacing: 2,
           color: "var(--flare)",
           borderTop: "1px solid var(--navy-line)",
           borderBottom: "1px solid var(--navy-line)",
-          padding: "3px 0",
+          padding: "5px 0",
           fontWeight: 700,
         }}
       >
@@ -357,20 +360,20 @@ function ByeCard({ team }: { team: Team }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
       style={{
-        width: 300,
+        width: 430,
         background: "linear-gradient(180deg, var(--navy-surface), var(--navy-deep))",
         border: "2px solid var(--gold)",
         borderRadius: 10,
-        padding: "18px 20px",
+        padding: "24px 30px",
         textAlign: "center",
         boxShadow: "0 0 30px rgba(255,210,63,0.25)",
         animation: "goldPulse 3s ease-in-out infinite",
       }}
     >
       <div style={{ animation: "crownFloat 2.4s ease-in-out infinite" }}>
-        <TrophyIcon size={32} />
+        <TrophyIcon size={42} />
       </div>
-      <div className="scoreboard" style={{ fontSize: 13, color: "var(--gold)", letterSpacing: 2, marginTop: 6 }}>
+      <div className="scoreboard" style={{ fontSize: 16, color: "var(--gold)", letterSpacing: 3, marginTop: 10 }}>
         ROUND 1 BYE
       </div>
       <div
@@ -378,21 +381,21 @@ function ByeCard({ team }: { team: Team }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 10,
-          marginTop: 4,
+          gap: 14,
+          marginTop: 8,
         }}
       >
-        <div style={{ fontWeight: 800, fontSize: 20 }}>{team.teamName.toUpperCase()}</div>
-        <TeamLogo teamName={team.teamName} size={62} />
+        <div style={{ fontWeight: 800, fontSize: 30, lineHeight: 1.05 }}>{team.teamName.toUpperCase()}</div>
+        <TeamLogo teamName={team.teamName} size={82} />
       </div>
-      <div style={{ fontSize: 13, color: "var(--chalk-dim)" }}>CAPTAIN: {team.captain}</div>
+      <div style={{ fontSize: 16, color: "var(--chalk-dim)", marginTop: 8 }}>CAPTAIN: {team.captain}</div>
       <CountUp
         value={team.deltaDeals}
         format={units}
         className="scoreboard"
-        style={{ fontSize: 34, color: "var(--gold)", display: "block", marginTop: 6 }}
+        style={{ fontSize: 50, color: "var(--gold)", display: "block", marginTop: 12 }}
       />
-      <div style={{ fontSize: 11, color: "var(--chalk-dim)", letterSpacing: 1 }}>UNITS</div>
+      <div style={{ fontSize: 14, color: "var(--chalk-dim)", letterSpacing: 2 }}>UNITS</div>
     </motion.div>
   );
 }
@@ -442,9 +445,9 @@ export default function Dashboard() {
       <FloatingBills />
       <RunningMascot />
 
-      <div style={{ padding: "36px 40px 0", position: "relative" }}>
+      <div style={{ padding: "36px 24px 0", position: "relative" }}>
         {/* Corner taglines */}
-        <div style={{ display: "flex", justifyContent: "space-between", maxWidth: 1280, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", maxWidth: 1720, margin: "0 auto" }}>
           <div className="corner-tag" style={{ fontSize: 20, transform: "rotate(-4deg)" }}>
             PLAY
             <br />
@@ -458,7 +461,7 @@ export default function Dashboard() {
         </div>
 
         {/* Title lockup */}
-        <div style={{ textAlign: "center", margin: "0 auto 4px", maxWidth: 1280 }}>
+        <div style={{ textAlign: "center", margin: "0 auto 4px", maxWidth: 1720 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
             <img src={LOGO_DATA_URI} alt="American Debt Protection" style={{ height: 64 }} />
           </div>
@@ -503,7 +506,7 @@ export default function Dashboard() {
         {mocked && (
           <div
             style={{
-              maxWidth: 1280,
+              maxWidth: 1720,
               margin: "0 auto 24px",
               padding: "10px 18px",
               border: "1px solid var(--navy-line)",
@@ -521,28 +524,28 @@ export default function Dashboard() {
         {/* Bracket layout */}
         <div
           style={{
-            maxWidth: 1280,
+            maxWidth: 1720,
             margin: "0 auto",
             display: "grid",
             gridTemplateColumns: "1fr auto 1fr",
-            gap: 24,
+            gap: 34,
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 60, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 82, alignItems: "flex-end" }}>
             {leftPairs.map(([a, b], i) => (
               <MatchCard key={a.teamId + "-" + b.teamId} a={a} b={b} align="left" delay={i * 1.5} />
             ))}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
             {byeTeam && <ByeCard team={byeTeam} />}
-            <div style={{ fontSize: 11, color: "var(--chalk-dim)", textAlign: "center", maxWidth: 200 }}>
+            <div style={{ fontSize: 14, color: "var(--chalk-dim)", textAlign: "center", maxWidth: 260 }}>
               Winners advance after manager confirmation
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 60, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 82, alignItems: "flex-start" }}>
             {rightPairs.map(([a, b], i) => (
               <MatchCard key={a.teamId + "-" + b.teamId} a={a} b={b} align="right" delay={0.75 + i * 1.5} />
             ))}
@@ -551,8 +554,8 @@ export default function Dashboard() {
 
         <footer
           style={{
-            maxWidth: 1280,
-            margin: "40px auto 0",
+            maxWidth: 1720,
+            margin: "48px auto 0",
             textAlign: "center",
             color: "var(--chalk-dim)",
             fontSize: 13,
