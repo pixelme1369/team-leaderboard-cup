@@ -153,7 +153,7 @@ function RunningMascot() {
         pointerEvents: "none",
       }}
     >
-      <div style={{ position: "absolute", animation: "runAcross 9s linear infinite" }}>
+      <div style={{ position: "absolute", bottom: 0, animation: "runAcross 9s linear infinite" }}>
         <div style={{ animation: "runBounce 0.35s ease-in-out infinite" }}>
           <img
             src={MASCOT_DATA_URI}
