@@ -179,7 +179,15 @@ function TeamLogo({ teamName, size = 56 }: { teamName: string; size?: number }) 
 function NameTicker({ agents }: { agents: AgentContribution[] }) {
   if (agents.length === 0) return null;
   const topAgents = agents.slice(0, 3);
-  const items = topAgents.map((a, index) => `${index + 1}. ${a.name.toUpperCase()} (${a.teamName.toUpperCase()}) · ${units(a.deals)} UNITS`);
+  const shoutouts = [
+    (a: AgentContribution) =>
+      `SHOUT OUT TO ${a.name.toUpperCase()} FOR CLOSING THE MOST UNITS · ${units(a.deals)} UNITS`,
+    (a: AgentContribution) =>
+      `${a.name.toUpperCase()} IS RIGHT BEHIND WITH ${units(a.deals)} UNITS · ${a.teamName.toUpperCase()}`,
+    (a: AgentContribution) =>
+      `${a.name.toUpperCase()} HOLDS TOP 3 WITH ${units(a.deals)} UNITS · KEEP PUSHING`,
+  ];
+  const items = topAgents.map((a, index) => shoutouts[index](a));
   const loopItems = [...items, ...items];
 
   return (
