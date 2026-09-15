@@ -202,7 +202,7 @@ function ContributionTicker({ agents }: { agents: AgentContribution[] }) {
           display: "flex",
           whiteSpace: "nowrap",
           width: "max-content",
-          animation: "marquee 90s linear infinite",
+          animation: "marquee 150s linear infinite",
         }}
       >
         {loopItems.map((item, i) => (
