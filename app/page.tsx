@@ -177,6 +177,7 @@ const TEAM_LOGOS: Record<string, string> = {
   c4: "/team-logos/c4.png",
   thedebtcartel: "/team-logos/debt-cartel.png",
   smurfcrew: "/team-logos/smurf-crew.png",
+  thedoorsrightthere: "/team-logos/the-doors-right-there.png",
 };
 
 function teamLogoFor(teamName: string) {
