@@ -464,7 +464,7 @@ export default function Dashboard() {
       <BackgroundFX />
       <FloatingBills />
 
-      <div style={{ padding: "36px 24px 0", position: "relative" }}>
+      <div style={{ padding: "24px 24px 0", position: "relative" }}>
         {/* Corner taglines */}
         <div style={{ display: "flex", justifyContent: "space-between", maxWidth: 1720, margin: "0 auto" }}>
           <div className="corner-tag" style={{ fontSize: 20, transform: "rotate(-4deg)" }}>
@@ -482,7 +482,7 @@ export default function Dashboard() {
         {/* Title lockup */}
         <div style={{ textAlign: "center", margin: "0 auto 4px", maxWidth: 1720 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
-            <img src={LOGO_DATA_URI} alt="American Debt Protection" style={{ height: 64 }} />
+            <img src={LOGO_DATA_URI} alt="American Debt Protection" style={{ height: 56 }} />
           </div>
           <div className="scoreboard" style={{ fontSize: 22, letterSpacing: 3, color: "var(--chalk)" }}>
             AMERICAN DEBT PROTECTION
@@ -490,7 +490,7 @@ export default function Dashboard() {
           <div style={{ fontSize: 12, letterSpacing: 2, color: "var(--chalk-dim)", marginTop: 2 }}>
             ONE TEAM &nbsp;•&nbsp; ONE GOAL &nbsp;•&nbsp; BIGGER PAYCHECKS
           </div>
-          <h1 className="poster-title" style={{ fontSize: 40, margin: "10px 0 0", letterSpacing: 0.5 }}>
+          <h1 className="poster-title" style={{ fontSize: 36, margin: "8px 0 0", letterSpacing: 0.5 }}>
             NINE TEAM CHAMPIONSHIP
           </h1>
         </div>
@@ -500,7 +500,7 @@ export default function Dashboard() {
             textAlign: "center",
             color: "var(--chalk-dim)",
             fontSize: 13,
-            margin: "6px 0 28px",
+            margin: "4px 0 18px",
           }}
         >
           <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -544,14 +544,14 @@ export default function Dashboard() {
         <div
           style={{
             maxWidth: 1720,
-            margin: "0 auto",
+            margin: "-16px auto 0",
             display: "grid",
             gridTemplateColumns: "1fr auto 1fr",
             gap: 34,
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 82, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 44, alignItems: "flex-end" }}>
             {leftPairs.map(([a, b], i) => (
               <MatchCard key={a.teamId + "-" + b.teamId} a={a} b={b} align="left" delay={i * 1.5} />
             ))}
@@ -564,7 +564,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 82, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 44, alignItems: "flex-start" }}>
             {rightPairs.map(([a, b], i) => (
               <MatchCard key={a.teamId + "-" + b.teamId} a={a} b={b} align="right" delay={0.75 + i * 1.5} />
             ))}
@@ -574,7 +574,7 @@ export default function Dashboard() {
         <footer
           style={{
             maxWidth: 1720,
-            margin: "48px auto 0",
+            margin: "24px auto 0",
             textAlign: "center",
             color: "var(--chalk-dim)",
             fontSize: 13,
