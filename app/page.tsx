@@ -176,168 +176,48 @@ function TeamLogo({ teamName, size = 56 }: { teamName: string; size?: number }) 
   );
 }
 
-function teamInitials(teamName: string) {
-  return teamName
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join("")
-    .replace("$", "S")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-function IndividualLeaderboard({ agents, teams }: { agents: AgentContribution[]; teams: Team[] }) {
-  const leaders = [...agents]
-    .sort((a, b) => b.deals - a.deals || b.enrolled - a.enrolled)
-    .slice(0, 3);
-  if (leaders.length === 0) return null;
-
-  const maxEnrolled = Math.max(...leaders.map((agent) => agent.enrolled), 1);
-  const captainNames = new Set(teams.map((team) => team.captain.toLowerCase()));
+function NameTicker({ agents }: { agents: AgentContribution[] }) {
+  if (agents.length === 0) return null;
+  const items = agents.map((a, index) => `${index + 1}. ${a.name.toUpperCase()} (${a.teamName.toUpperCase()}) · ${units(a.deals)} UNITS`);
+  const loopItems = [...items, ...items];
 
   return (
     <div
       style={{
         position: "fixed",
+        bottom: 48,
         left: 0,
         right: 0,
-        bottom: 48,
+        overflow: "hidden",
+        padding: "10px 0",
+        background: "linear-gradient(180deg, rgba(8,12,28,0.98), rgba(13,22,48,0.98))",
+        borderTop: "2px solid rgba(255,210,63,0.8)",
         zIndex: 11,
-        padding: "14px 24px 12px",
-        background: "linear-gradient(180deg, rgba(5,8,16,0.92), rgba(8,12,28,0.96))",
-        borderTop: "1px solid rgba(202,162,74,0.45)",
-        boxShadow: "0 -14px 34px rgba(0,0,0,0.35)",
       }}
     >
       <div
         style={{
-          maxWidth: 1720,
-          margin: "0 auto",
+          display: "flex",
+          whiteSpace: "nowrap",
+          width: "max-content",
+          animation: "marquee 150s linear infinite",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 10 }}>
-          <div
+        {loopItems.map((item, i) => (
+          <span
+            key={i}
             className="scoreboard"
             style={{
-              color: "var(--chalk-dim)",
-              fontSize: 14,
-              letterSpacing: 5,
-              textTransform: "uppercase",
+              fontSize: 17,
+              padding: "0 32px",
+              color: i % agents.length === 0 ? "var(--gold)" : "var(--chalk)",
+              textShadow: "0 2px 4px rgba(0,0,0,0.45)",
             }}
           >
-            Individual Leaderboard · Units Enrolled
-          </div>
-          <div style={{ height: 1, flex: 1, background: "rgba(154,168,204,0.24)" }} />
-        </div>
-
-        <div style={{ display: "grid", gap: 8 }}>
-          {leaders.map((agent, index) => {
-            const isCaptain = captainNames.has(agent.name.toLowerCase());
-            const progress = Math.max(8, (agent.enrolled / maxEnrolled) * 100);
-            const avg = agent.deals > 0 ? agent.enrolled / agent.deals : 0;
-
-            return (
-              <div
-                key={`${agent.name}-${agent.teamName}`}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "92px 58px minmax(240px, 1fr) minmax(420px, 1.2fr) 74px",
-                  alignItems: "center",
-                  gap: 18,
-                  minHeight: 60,
-                  padding: "10px 20px",
-                  border: "1px solid rgba(202,162,74,0.72)",
-                  borderRadius: 8,
-                  background:
-                    index === 0
-                      ? "linear-gradient(90deg, rgba(255,210,63,0.12), rgba(16,26,52,0.68))"
-                      : "rgba(16,26,52,0.72)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div className="scoreboard" style={{ color: "var(--gold)", fontSize: 36 }}>
-                    {index + 1}
-                  </div>
-                  <div className="scoreboard" style={{ color: "var(--chalk-dim)", fontSize: 16 }}>
-                    -
-                  </div>
-                </div>
-
-                <div
-                  className="scoreboard"
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 8,
-                    display: "grid",
-                    placeItems: "center",
-                    color: "var(--navy-black)",
-                    fontSize: 20,
-                    background: index === 0 ? "#34a853" : "var(--gold-deep)",
-                    border: "2px solid rgba(255,255,255,0.28)",
-                  }}
-                >
-                  {teamInitials(agent.teamName)}
-                </div>
-
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 900, fontSize: 24, lineHeight: 1, color: "var(--chalk)" }}>
-                    {agent.name.toUpperCase()}
-                  </div>
-                  <div
-                    className="scoreboard"
-                    style={{ marginTop: 7, color: "var(--chalk-dim)", fontSize: 13, letterSpacing: 3 }}
-                  >
-                    {agent.teamName.toUpperCase()}
-                    {isCaptain ? " · CAPTAIN" : ""}
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      height: 16,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      background: "rgba(154,168,204,0.12)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${progress}%`,
-                        height: "100%",
-                        borderRadius: 999,
-                        background: "linear-gradient(90deg, var(--gold), #ffbd2e)",
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="scoreboard"
-                    style={{
-                      marginTop: 8,
-                      color: "var(--chalk-dim)",
-                      fontSize: 14,
-                      letterSpacing: 2,
-                      display: "flex",
-                      gap: 28,
-                    }}
-                  >
-                    <span>{money(agent.enrolled)} ENROLLED</span>
-                    <span>AVG {money(avg)}</span>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>🔥</span>
-                  <span className="scoreboard" style={{ color: "var(--gold)", fontSize: 34 }}>
-                    {units(agent.deals)}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+            <span style={{ color: "var(--gold)", marginRight: 22 }}>•</span>
+            {item}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -580,7 +460,7 @@ export default function Dashboard() {
   const rightPairs = pairs.slice(2, 4);
 
   return (
-    <main style={{ minHeight: "100vh", position: "relative", overflow: "hidden", paddingBottom: 330 }}>
+    <main style={{ minHeight: "100vh", position: "relative", overflow: "hidden", paddingBottom: 150 }}>
       <BackgroundFX />
       <FloatingBills />
 
@@ -703,7 +583,7 @@ export default function Dashboard() {
           More deals · Stronger team · Bigger future
         </footer>
       </div>
-      <IndividualLeaderboard agents={agents} teams={teams} />
+      <NameTicker agents={agents} />
       <ContributionTicker agents={agents} />
     </main>
   );
