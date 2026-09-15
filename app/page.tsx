@@ -200,7 +200,7 @@ function NameTicker({ agents }: { agents: AgentContribution[] }) {
         style={{
           display: "flex",
           whiteSpace: "nowrap",
-          width: "max-content",
+          width: "200vw",
           animation: "marquee 150s linear infinite",
         }}
       >
@@ -210,8 +210,12 @@ function NameTicker({ agents }: { agents: AgentContribution[] }) {
             className="scoreboard"
             style={{
               fontSize: 17,
+              width: "33.333vw",
               padding: "0 32px",
+              boxSizing: "border-box",
               color: i % topAgents.length === 0 ? "var(--gold)" : "var(--chalk)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               textShadow: "0 2px 4px rgba(0,0,0,0.45)",
             }}
           >
