@@ -545,6 +545,10 @@ export default function Dashboard() {
   const [mocked, setMocked] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
+  // Last time data actually arrived — the watchdog below uses this to notice a
+  // display that has quietly stopped updating.
+  const lastOkRef = useRef<number>(Date.now());
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -556,16 +560,75 @@ export default function Dashboard() {
         setMocked(json.mocked);
         setAgents(json.agentContributions || []);
         setLastFetched(new Date());
+        lastOkRef.current = Date.now();
       } catch (e) {
         // keep last known good data on transient failure
       }
     }
     load();
     const interval = setInterval(load, 20000);
+
+    // A TV that slept or dropped off Wi-Fi catches up the moment it is back,
+    // instead of showing stale numbers until the next poll comes around.
+    const wake = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", wake);
+    window.addEventListener("online", wake);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", wake);
+      window.removeEventListener("online", wake);
+    };
+  }, []);
+
+  // Pick up new deploys on their own: the deployment id changes when a build
+  // ships, and a display running the old bundle reloads into the new one.
+  useEffect(() => {
+    let cancelled = false;
+    let running: string | null = null;
+
+    async function check() {
+      try {
+        const res = await fetch("/api/version", { cache: "no-store" });
+        const { version } = await res.json();
+        if (cancelled || !version) return;
+        if (running === null) {
+          running = version;
+        } else if (version !== running) {
+          window.location.reload();
+        }
+      } catch (e) {
+        // a failed check just means we try again next minute
+      }
+    }
+
+    check();
+    const interval = setInterval(check, 60000);
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
+  }, []);
+
+  // Last resort for an unattended screen: if nothing has loaded for a long
+  // while the page is wedged, and only a reload will bring it back.
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (Date.now() - lastOkRef.current <= 10 * 60 * 1000) return;
+      // Only reload if the server is actually reachable. Reloading into a dead
+      // network would replace stale-but-readable numbers with a browser error
+      // page, and nobody is standing at the TV to click reload.
+      try {
+        const res = await fetch("/api/version", { cache: "no-store" });
+        if (res.ok) window.location.reload();
+      } catch (e) {
+        // still offline — keep the last known board on screen and try later
+      }
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const byeTeam = teams[0];
