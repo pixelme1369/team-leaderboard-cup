@@ -325,12 +325,37 @@ function TeamRow({ team, align = "left" }: { team: Team; align?: "left" | "right
           CAPTAIN: {team.captain}
         </div>
       </div>
-      <CountUp
-        value={team.deltaDeals}
-        format={units}
-        className="scoreboard"
-        style={{ fontSize: 30, color: "var(--gold)", minWidth: 46, textAlign: align === "left" ? "right" : "left" }}
-      />
+      <div
+        style={{
+          flexShrink: 0,
+          textAlign: align === "left" ? "right" : "left",
+        }}
+      >
+        <CountUp
+          value={team.deltaDeals}
+          format={units}
+          className="scoreboard"
+          style={{
+            fontSize: 30,
+            color: "var(--gold)",
+            display: "block",
+            minWidth: 46,
+            textAlign: align === "left" ? "right" : "left",
+          }}
+        />
+        <CountUp
+          value={team.deltaEnrolled}
+          format={money}
+          className="scoreboard"
+          style={{
+            fontSize: 12,
+            color: "var(--grass-line)",
+            display: "block",
+            marginTop: 2,
+            textAlign: align === "left" ? "right" : "left",
+          }}
+        />
+      </div>
     </div>
   );
 }
