@@ -429,6 +429,15 @@ function ByeCard({ team }: { team: Team }) {
         style={{ fontSize: 50, color: "var(--gold)", display: "block", marginTop: 12 }}
       />
       <div style={{ fontSize: 14, color: "var(--chalk-dim)", letterSpacing: 2 }}>UNITS</div>
+      <div style={{ fontSize: 11, color: "var(--chalk-dim)", letterSpacing: 1.5, marginTop: 6 }}>
+        TOTAL ENROLLED DEBT
+      </div>
+      <CountUp
+        value={team.deltaEnrolled}
+        format={money}
+        className="scoreboard"
+        style={{ fontSize: 15, color: "var(--grass-line)", display: "block", marginTop: 1 }}
+      />
     </motion.div>
   );
 }
