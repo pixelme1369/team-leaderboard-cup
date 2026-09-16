@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useAnimationControls,
+  useMotionValue,
+  useSpring,
+} from "framer-motion";
 
 type Team = {
   rank: number;
@@ -33,15 +39,33 @@ function CountUp({
   className,
   style,
   format = money,
+  slam = false,
+  slamScale = 2.6,
+  slamGlow = "rgba(255,210,63,0.9)",
+  slamOrigin = "center",
 }: {
   value: number;
   className?: string;
   style?: React.CSSProperties;
   format?: (n: number) => string;
+  /** Slam the number in iMessage-style when it changes. */
+  slam?: boolean;
+  /** How large the number starts before it slams down. */
+  slamScale?: number;
+  slamGlow?: string;
+  /** Anchor the slam so an oversized number grows into the card, not past its edge. */
+  slamOrigin?: string;
 }) {
   const motionVal = useMotionValue(0);
-  const spring = useSpring(motionVal, { stiffness: 60, damping: 20, mass: 1 });
+  // Slamming numbers settle fast so the digits land with the impact.
+  const springConfig = useMemo(
+    () => (slam ? { stiffness: 180, damping: 24, mass: 0.7 } : { stiffness: 60, damping: 20, mass: 1 }),
+    [slam]
+  );
+  const spring = useSpring(motionVal, springConfig);
   const [display, setDisplay] = useState(0);
+  const controls = useAnimationControls();
+  const prev = useRef<number | null>(null);
 
   useEffect(() => {
     motionVal.set(value);
@@ -52,9 +76,52 @@ function CountUp({
     return unsub;
   }, [spring]);
 
+  useEffect(() => {
+    if (!slam) return;
+    // Don't slam on first paint — only on a real change.
+    if (prev.current === null || prev.current === value) {
+      prev.current = value;
+      return;
+    }
+    prev.current = value;
+    // Land on the new number immediately: the slam delivers the value, so the
+    // digits must not still be ticking up while it hits.
+    spring.jump(value);
+    controls.start({
+      // Drops in oversized and transparent, undershoots on impact, rebounds.
+      scale: [slamScale, slamScale * 0.72, 0.84, 1.1, 1],
+      opacity: [0, 0.9, 1, 1, 1],
+      rotate: [0, 0, -3.5, 2, 0],
+      filter: [
+        "drop-shadow(0 0 0px rgba(0,0,0,0))",
+        `drop-shadow(0 0 12px ${slamGlow})`,
+        `drop-shadow(0 0 34px ${slamGlow})`,
+        `drop-shadow(0 0 14px ${slamGlow})`,
+        "drop-shadow(0 0 0px rgba(0,0,0,0))",
+      ],
+      transition: {
+        duration: 0.8,
+        times: [0, 0.3, 0.55, 0.72, 1],
+        ease: ["easeIn", "easeIn", "easeOut", "easeOut"],
+      },
+    });
+  }, [value, slam, slamScale, slamGlow, controls, spring]);
+
+  if (!slam) {
+    return (
+      <span className={className} style={style}>
+        {format(display)}
+      </span>
+    );
+  }
+
+  // Outer span keeps the layout (alignment, width); inner shrink-wraps the
+  // digits so the slam scales around the number itself, not the column.
   return (
     <span className={className} style={style}>
-      {format(display)}
+      <motion.span animate={controls} style={{ display: "inline-block", transformOrigin: slamOrigin }}>
+        {format(display)}
+      </motion.span>
     </span>
   );
 }
@@ -335,6 +402,9 @@ function TeamRow({ team, align = "left" }: { team: Team; align?: "left" | "right
           value={team.deltaDeals}
           format={units}
           className="scoreboard"
+          slam
+          slamScale={2.4}
+          slamOrigin={align === "left" ? "right center" : "left center"}
           style={{
             fontSize: 30,
             color: "var(--gold)",
@@ -451,6 +521,8 @@ function ByeCard({ team }: { team: Team }) {
         value={team.deltaDeals}
         format={units}
         className="scoreboard"
+        slam
+        slamScale={2.8}
         style={{ fontSize: 50, color: "var(--gold)", display: "block", marginTop: 12 }}
       />
       <div style={{ fontSize: 14, color: "var(--chalk-dim)", letterSpacing: 2 }}>UNITS</div>
