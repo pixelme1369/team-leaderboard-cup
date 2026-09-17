@@ -4,9 +4,70 @@ import { getBigQueryClient } from "./bigquery";
 // The competition began Sept 14 - only contacts submitted from this point on
 // count toward a team's total. No baseline subtraction, ranking is purely
 // "new deals submitted since the game started."
-const COMPETITION_START = "2026-09-14T00:00:00Z";
+//
+// The kickoff is midnight *Pacific*, not UTC: a UTC boundary would start the
+// game at 5pm Pacific on the 13th and hand a head start to whoever submitted
+// that evening.
+const COMPETITION_START_DATE = "2026-09-14";
+const COMPETITION_TIMEZONE = "America/Los_Angeles";
 
+const BQ_DATASET = "`amity-one-call-data.aod_forth_data`";
 const BQ_TABLE = "`amity-one-call-data.aod_forth_data.VW_SAMAN`";
+const SUBMITTED_DATE_COLUMN = "submitted_date";
+
+/**
+ * Builds the "submitted since kickoff" comparison for whichever type the view
+ * declares submitted_date as.
+ *
+ * The type matters more than it looks. A STRING column compared against a
+ * timestamp-shaped string compares lexicographically, so plain "2026-09-14"
+ * sorts *before* "2026-09-14T00:00:00Z" and the whole first day of the
+ * competition silently drops out of the count.
+ */
+export function buildSubmittedSinceClause(dataType: string | null): string {
+  const col = SUBMITTED_DATE_COLUMN;
+  switch ((dataType || "").toUpperCase()) {
+    case "TIMESTAMP":
+      // An absolute instant: resolve Pacific midnight to its UTC instant.
+      // TIMESTAMP(datetime, tz) is DST-aware, so this holds across the year.
+      return `${col} >= TIMESTAMP(DATETIME(@startDate), @tz)`;
+    case "DATETIME":
+      // Wall-clock local time already - compare at local midnight.
+      return `${col} >= DATETIME(@startDate)`;
+    case "DATE":
+      return `${col} >= @startDate`;
+    case "STRING":
+      // Take the leading YYYY-MM-DD and compare as a real date, so the
+      // comparison can't fall back to lexicographic ordering.
+      return `SAFE_CAST(SUBSTR(${col}, 1, 10) AS DATE) >= @startDate`;
+    default:
+      // Type unknown: normalise through text and compare whole days. Loses
+      // sub-day precision but never silently drops the first day.
+      return `SAFE_CAST(SUBSTR(CAST(${col} AS STRING), 1, 10) AS DATE) >= @startDate`;
+  }
+}
+
+// The view's schema doesn't change between syncs, so look it up once.
+let submittedDateType: string | null | undefined;
+
+async function getSubmittedDateType(bq: any): Promise<string | null> {
+  if (submittedDateType !== undefined) return submittedDateType;
+  try {
+    const [rows] = await bq.query({
+      query: `
+        SELECT data_type
+        FROM ${BQ_DATASET}.INFORMATION_SCHEMA.COLUMNS
+        WHERE table_name = @table AND column_name = @column
+      `,
+      params: { table: "VW_SAMAN", column: SUBMITTED_DATE_COLUMN },
+    });
+    submittedDateType = (rows as any[])[0]?.data_type ?? null;
+  } catch (e) {
+    // Fall back to the type-agnostic comparison rather than failing the sync.
+    submittedDateType = null;
+  }
+  return submittedDateType;
+}
 
 /**
  * Aggregates directly from the BigQuery view by agent, for contacts
@@ -24,14 +85,18 @@ async function fetchAgentEnrollment(): Promise<{
 
   if (hasRealCreds) {
     const bq = getBigQueryClient();
+    const submittedSince = buildSubmittedSinceClause(await getSubmittedDateType(bq));
+    // One unit = one row in the view, i.e. one submitted contact, counted
+    // against the agent in assigned_to.
     const [rows] = await bq.query({
       query: `
         SELECT assigned_to AS agent, SUM(enrolled_debt) AS enrolled, COUNT(*) AS deals
         FROM ${BQ_TABLE}
-        WHERE submitted_date >= @competitionStart
+        WHERE ${submittedSince}
         GROUP BY assigned_to
       `,
-      params: { competitionStart: COMPETITION_START },
+      params: { startDate: COMPETITION_START_DATE, tz: COMPETITION_TIMEZONE },
+      types: { startDate: "DATE", tz: "STRING" },
     });
 
     const data: Record<string, { enrolled: number; deals: number }> = {};

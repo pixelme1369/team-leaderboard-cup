@@ -15,6 +15,25 @@ Live: https://amity-team-leaderboard.vercel.app
   (`amity-one-call-data.aod_forth_data.VW_SAMAN`)
 - **Framer Motion** — reorder/count-up animations
 
+## What counts as a unit
+
+One **unit = one row in `VW_SAMAN`**, i.e. one submitted contact, credited to
+the agent named in `assigned_to` and rolled up to that agent's team via
+`agent_roster`.
+
+A row counts when its **`submitted_date`** falls on or after kickoff —
+**2026-09-14, midnight Pacific**. Nothing else is filtered: no status,
+product, or funding check, and no baseline subtraction. The `TOTAL ENROLLED
+DEBT` under each unit count is `SUM(enrolled_debt)` over those same rows, so
+the two numbers always describe the same set of deals.
+
+Kickoff is anchored to Pacific rather than UTC — a UTC boundary would start
+the game at 5pm Pacific on the 13th. `submitted_date` is compared as a real
+date whatever type the view declares it as (`lib/sync.ts`,
+`buildSubmittedSinceClause`); against a STRING column a naive text comparison
+sorts `2026-09-14` *before* `2026-09-14T00:00:00Z` and drops kickoff day
+entirely.
+
 ## How it works
 
 - A Vercel cron (`vercel.json`) hits `/api/sync` every 15 minutes.
